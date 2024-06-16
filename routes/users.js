@@ -1,9 +1,10 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const { authenticate } = require('../middleware/auth');
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+const router = express.Router();
+
+router.get('/profile', authenticate, (req, res) => {
+  res.json({ message: `Welcome ${req.user.name}` });
 });
 
 module.exports = router;
