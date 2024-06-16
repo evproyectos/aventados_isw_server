@@ -4,11 +4,11 @@ const UserClient = require('../models/userClientModel');
 
 // Register a new user
 const register = async (req, res, next) => {
-  const { name, lastname, email, password, idNumber, birthDate, phoneNumber } = req.body;
+  const { name, lastName, email, password, idNumber, birthDate, phoneNumber } = req.body;
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new UserClient({ name, lastname, email, password: hashedPassword, idNumber, birthDate, phoneNumber});
+    const user = new UserClient({ name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber});
     await user.save();
     res.json({ message: 'Registration successful' });
   } catch (error) {

@@ -8,7 +8,8 @@ const userClientSchema = new mongoose.Schema({
         required: true
     },
     lastName: {
-        type: String
+        type: String,
+        required: true
     },
     email: {
         type: String,
