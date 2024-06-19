@@ -7,4 +7,6 @@ router.get('/profile', authenticate, (req, res) => {
   res.json({ message: `Welcome ${req.user.name}` });
 });
 
+
+
 module.exports = router;
