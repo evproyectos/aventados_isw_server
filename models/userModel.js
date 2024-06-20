@@ -39,9 +39,23 @@ const userSchema = new mongoose.Schema({
     },
     role: {
         type: String,
+        required: true,
         enum: ['client', 'driver'],
         default: 'client'
-      }
+    },
+    // this information is inly necessary for drivers
+    plate: {
+        type: String,
+    },
+    brand: {
+        type: String
+    },
+    model: {
+        type: String
+    },
+    year: {
+        type: String
+    }
     
     },{
         timestamps: true

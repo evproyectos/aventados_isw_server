@@ -1,8 +1,7 @@
 const express = require('express');
 const corsMiddleware = require('./middleware/cors');
 const bodyParserMiddleware = require('./middleware/bodyParser');
-const authRoutes = require('./routes/auth');
-const userRoutes = require('./routes/users');
+const authRoutes = require('./routes/userRoutes');
 
 const app = express();
 
@@ -11,8 +10,7 @@ app.use(corsMiddleware);
 app.use(bodyParserMiddleware);
 
 // routes
-app.use('/auth',authRoutes);
-app.use('/user', userRoutes);
+app.use('/user', authRoutes);
 
 
 module.exports = app;
