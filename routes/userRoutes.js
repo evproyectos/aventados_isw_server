@@ -9,7 +9,7 @@ router.post('/login', login);
 
 router.get('/profile', authenticate, profile);
 router.put('/update', authenticate, updateUser);
-
+router.delete('/delete', authenticate, deleteUser);
 
 
 
