@@ -14,6 +14,8 @@ app.use(bodyParserMiddleware);
 app.use('/user', authRoutes);
 app.use('/rides', rideRoutes);
 
+// Comments
+
 
 
 module.exports = app;
