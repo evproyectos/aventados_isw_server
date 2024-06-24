@@ -8,7 +8,7 @@ const {
     updateRide,
     deleteRide,
     bookRide
-} = require('../controllers/ride');
+} = require('../controllers/rideController');
 
 const router = express.Router();
 
