@@ -11,13 +11,13 @@ const register = async (req, res, next) => {
     const user = new User({ name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year });
     
     await user.save();
-    res.json({ message: 'Registration successful' });
+    res.status(201).json({ name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year });
   } catch (error) {
     next(error);
   }
 };
 
-// Login with an existing user
+// Login with an existing user 
 const login = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -36,8 +36,7 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1 hour'
     });
-    res.json({ token });
-    console.log(token);
+    res.status(201).json({ token });
   } catch (error) {
     next(error);
   }
@@ -46,8 +45,7 @@ const login = async (req, res, next) => {
 // Get the information of the user
 const profile = async (req, res) => {
   
-  if (req.user.role === 'client') res.json({ message: `Welcome client ${req.user.name}` });
-  if (req.user.role === 'driver') res.json({ message: `Welcome driver ${req.user.name}` });
+  res.status(201).json(req.user);
 };
 
 const updateUser = async (req, res, next) => {
@@ -58,9 +56,6 @@ const updateUser = async (req, res, next) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-
-    console.log(user);
-
     if (name) user.name = name;
     if (lastName) user.lastName = lastName;
     if (email) user.email = email;
@@ -74,12 +69,10 @@ const updateUser = async (req, res, next) => {
       if (brand) user.brand = brand;
       if (model) user.model = model;
       if (year) user.year = year;
-    }else{
-      return res.status(500).json({ message: "Client can't add driver details"});
     }
     
     await user.save();
-    res.json({ message: 'User updated successfully' });
+    res.status(201).json(user);
   } catch (error) {
     next(error);
   }

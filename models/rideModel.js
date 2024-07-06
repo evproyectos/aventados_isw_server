@@ -25,6 +25,10 @@ const rideSchema = new mongoose.Schema({
     availableSeats: {
         type: Number,
         required: true
+    },
+    fee: {
+        type: Number,
+        required: true
     }
 }, {
     timestamps: true
