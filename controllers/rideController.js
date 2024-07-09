@@ -18,9 +18,10 @@ const createRide = async (req, res, next) => {
             fee
         });
         await ride.save();
-        res.json({ message: 'Ride created successfully', ride });
+        res.status(201).json({ message: 'Ride created successfully', ride });
     } catch (error) {
         next(error);
+        console.log(error);
     }
 };
 
@@ -75,7 +76,7 @@ const updateRide = async (req, res, next) => {
             return res.status(403).json({ message: 'You can only update your own rides' });
         }
 
-        const { origin, destination, departureTime, availableSeats } = req.body;
+        const { origin, destination, departureTime, availableSeats, fee } = req.body;
         ride.origin = origin;
         ride.destination = destination;
         ride.departureTime = departureTime;
@@ -105,7 +106,7 @@ const deleteRide = async (req, res, next) => {
             return res.status(403).json({ message: 'You can only delete your own rides' });
         }
 
-        await ride.remove();
+        await ride.deleteOne();
         res.json({ message: 'Ride deleted successfully' });
     } catch (error) {
         next(error);
