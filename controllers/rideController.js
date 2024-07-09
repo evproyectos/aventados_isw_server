@@ -6,7 +6,7 @@ const createRide = async (req, res, next) => {
         return res.status(403).json({ message: 'Only drivers can create rides' });
     }
 
-    const { origin, destination, departureTime, availableSeats } = req.body;
+    const { origin, destination, departureTime, availableSeats, fee } = req.body;
 
     try {
         const ride = new Ride({
@@ -14,12 +14,14 @@ const createRide = async (req, res, next) => {
             origin,
             destination,
             departureTime,
-            availableSeats
+            availableSeats,
+            fee
         });
         await ride.save();
-        res.json({ message: 'Ride created successfully', ride });
+        res.status(201).json({ message: 'Ride created successfully', ride });
     } catch (error) {
         next(error);
+        console.log(error);
     }
 };
 
@@ -28,6 +30,18 @@ const getRides = async (req, res, next) => {
     try {
         const rides = await Ride.find().populate('driver').populate('passengers');
         res.json(rides);
+    } catch (error) {
+        next(error);
+    }
+};
+
+const getRidesByDriver = async (req, res, next) => {
+    try {
+        const rides = await Ride.find({ driver: req.params.driverId }).populate('driver').populate('passengers');
+        if (rides.length === 0) {
+            return res.status(404).json({ message: 'No rides found for this driver' });
+        }
+        res.status(201).json(rides);
     } catch (error) {
         next(error);
     }
@@ -62,11 +76,12 @@ const updateRide = async (req, res, next) => {
             return res.status(403).json({ message: 'You can only update your own rides' });
         }
 
-        const { origin, destination, departureTime, availableSeats } = req.body;
+        const { origin, destination, departureTime, availableSeats, fee } = req.body;
         ride.origin = origin;
         ride.destination = destination;
         ride.departureTime = departureTime;
         ride.availableSeats = availableSeats;
+        ride.fee = fee;
         await ride.save();
 
         res.json({ message: 'Ride updated successfully', ride });
@@ -91,7 +106,7 @@ const deleteRide = async (req, res, next) => {
             return res.status(403).json({ message: 'You can only delete your own rides' });
         }
 
-        await ride.remove();
+        await ride.deleteOne();
         res.json({ message: 'Ride deleted successfully' });
     } catch (error) {
         next(error);
@@ -118,7 +133,7 @@ const bookRide = async (req, res, next) => {
         ride.availableSeats -= 1;
         await ride.save();
 
-        res.json({ message: 'Ride booked successfully', ride });
+        res.status(201).json(ride);
     } catch (error) {
         next(error);
     }
@@ -127,6 +142,7 @@ const bookRide = async (req, res, next) => {
 module.exports = {
     createRide,
     getRides,
+    getRidesByDriver,
     getRideById,
     updateRide,
     deleteRide,

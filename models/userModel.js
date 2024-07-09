@@ -63,8 +63,6 @@ const userSchema = new mongoose.Schema({
 
 
 userSchema.methods.comparePassword = async function(enteredPassword) {
-    console.log(enteredPassword,this.password);
-    console.log(this.email);
     return await bcrypt.compare(enteredPassword, this.password);
 };
 
