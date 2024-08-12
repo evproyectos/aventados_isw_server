@@ -55,6 +55,12 @@ const userSchema = new mongoose.Schema({
     },
     year: {
         type: String
+    },
+    state: {
+        type: String
+    },
+    verificationToken:{
+        type: String
     }
     
     },{
