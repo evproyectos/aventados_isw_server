@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const crypto = require('crypto');
 const User = require('../models/userModel');
+const admin = require('../firebasAdmin');
 
 
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
@@ -16,7 +17,7 @@ const register = async (req, res, next) => {
   const verificationToken = crypto.randomBytes(32).toString('hex');
 
 
-  const { name, lastName, email, password, idNumber, birthDate, phoneNumber, role, plate, brand, model, year } = req.body;
+  const {uid, name, lastName, email, password, idNumber, birthDate, phoneNumber, role, plate, brand, model, year } = req.body;
   const state = 'pending';
 
   const sentFrom = new Sender("aventados3@trial-pr9084zx278lw63d.mlsender.net", "Aventados");
@@ -34,18 +35,50 @@ const register = async (req, res, next) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year, state, verificationToken });
+    const user = new User({ uid, name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year, state, verificationToken });
     
     await user.save();
     mailerSend.email
       .send(emailParams)
       .then((response) => console.log(response))
       .catch((error) => console.log(error));
-    res.status(201).json({ name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year });
+    res.status(201).json({ uid, name, lastName, email, password: hashedPassword, idNumber, birthDate, phoneNumber, role, plate, brand, model, year });
   } catch (error) {
     next(error);
   }
 };
+
+const verifyTokenGoogle = async (req, res, next) => {
+  const token1 = req.body.token;
+
+  try {
+    const decodedToken = await admin.auth().verifyIdToken(token1);
+    const uid = decodedToken.uid;
+
+
+    const user = await User.findOne({ uid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+
+    if(user.state !== "active") {
+      return res.status(401).json({ message: 'User not verified' });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: '1 hour'
+    });
+    
+
+    res.status(201).json({ token });
+    console.log(token);
+  } catch (error) {
+    console.log(error);
+    res.status(401).send('Token no válido');
+  }
+
+}
 
 const verify = async (req, res, next) => {
 
@@ -94,11 +127,14 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
       expiresIn: '1 hour'
     });
+    
     res.status(201).json({ token });
   } catch (error) {
     next(error);
   }
 };
+
+const verify_pin = async (req,res)
 
 // Get the information of the user
 const profile = async (req, res) => {
@@ -154,4 +190,4 @@ const deleteUser = async (req, res, next) => {
 
 
 
-module.exports = { register, login, profile, updateUser, deleteUser, verify};
+module.exports = { register, login, profile, updateUser, deleteUser, verify, verifyTokenGoogle};
