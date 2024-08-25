@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema({
         enum: ['client', 'driver'],
         default: 'client'
     },
+    
+    verificationPin:{
+        type: String
+    },
     // this information is inly necessary for drivers
     plate: {
         type: String,
@@ -66,7 +70,8 @@ const userSchema = new mongoose.Schema({
     },
     verificationToken:{
         type: String
-    }
+    },
+
     
     },{
         timestamps: true

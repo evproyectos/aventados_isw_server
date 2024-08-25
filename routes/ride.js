@@ -20,6 +20,5 @@ router.get('/driver/:driverId', authenticate,role(['driver']), getRidesByDriver)
 router.put('/:id', authenticate, role(['driver']), updateRide);
 router.delete('/:id', authenticate, role(['driver']), deleteRide);
 
-router.post('/:id/book', authenticate, role(['client']), bookRide);
 
 module.exports = router;
