@@ -3,6 +3,11 @@ const bcrypt = require('bcryptjs');
 
 
 const userSchema = new mongoose.Schema({
+    uid: {
+        type: String,
+        required: true,
+        unique: true
+    },
     name: {
         type: String,
         required: true
@@ -43,6 +48,10 @@ const userSchema = new mongoose.Schema({
         enum: ['client', 'driver'],
         default: 'client'
     },
+    
+    verificationPin:{
+        type: String
+    },
     // this information is inly necessary for drivers
     plate: {
         type: String,
@@ -55,7 +64,14 @@ const userSchema = new mongoose.Schema({
     },
     year: {
         type: String
-    }
+    },
+    state: {
+        type: String
+    },
+    verificationToken:{
+        type: String
+    },
+
     
     },{
         timestamps: true

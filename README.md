@@ -250,10 +250,8 @@ Aventados ISW is an API for a web application that allows users to book trips wi
 
 ## Authors
 - **Emanuel Vargas**
-- **Melissa Madriz**
 
 ## Contact
 For any questions or support, please contact us at:
 - **Emanuel Vargas**:
-- **Melissa Madriz**: 
 ```
