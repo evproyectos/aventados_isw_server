@@ -10,7 +10,7 @@ router.post('/bookride', authenticate, role(['client']), bookRide);
 router.get('/ride/:rideId', role(['driver']), getBookingsByRideId); 
 router.get('/driver/:driverId',authenticate, role(['driver']), getBookingsByDriver); 
 router.put('/:bookingId/status', authenticate, role(['driver']), updateBookingStatus);
-router.get('/passenger/:passengerId', getBookingsByPassenger);
+router.get('/passenger/:passengerId',authenticate, role(['client']), getBookingsByPassenger);
 
 
 module.exports = router;

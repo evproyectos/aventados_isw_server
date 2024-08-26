@@ -22,7 +22,7 @@ const bookRide = async (req, res, next) => {
 
         const booking = new Booking({
             ride: rideId,
-            passenger: passengerId,
+            passenger: req.user.id,
             status: 'pending',
             paymentStatus: 'pending'
         });
