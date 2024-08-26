@@ -6,7 +6,15 @@ const admin = require('../firebasAdmin');
 const { sendSMS } = require('../utils/sendSMS');
 const { MailerSend, EmailParams, Sender, Recipient } = require("mailersend");
 
-// Register a new user
+/**
+ * Register a new user.
+ * Hashes the user's password, generates a verification token and pin, 
+ * and sends a verification email. The user's state is initially set to "pending".
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const register = async (req, res, next) => {
     const mailerSend = new MailerSend({
         apiKey: process.env.MAILERSEND_API_KEY,
@@ -48,14 +56,21 @@ const register = async (req, res, next) => {
     }
 };
 
+/**
+ * Verifies a Google authentication token.
+ * Checks if the user exists and is verified, sends a 6-digit verification PIN via SMS,
+ * and saves it in the database.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const verifyTokenGoogle = async (req, res, next) => {
     const token1 = req.body.token;
 
-    console.log(token1);
     try {
         const decodedToken = await admin.auth().verifyIdToken(token1);
         const uid = decodedToken.uid;
-        console.log(uid);
 
         const user = await User.findOne({ uid });
         if (!user) {
@@ -66,13 +81,10 @@ const verifyTokenGoogle = async (req, res, next) => {
             return res.status(401).json({ message: 'User not verified' });
         }
 
-        // Generate a 6-digit PIN
         const pin = Math.floor(100000 + Math.random() * 900000);
 
-        // Send the PIN via SMS
         await sendSMS(user.phoneNumber, `Your verification PIN is ${pin}`);
 
-        // Save the PIN and expiration time in the database
         user.verificationPin = pin;
         await user.save();
 
@@ -83,9 +95,16 @@ const verifyTokenGoogle = async (req, res, next) => {
     }
 };
 
+/**
+ * Verifies a user's account using a verification token.
+ * If the token matches, the user's state is updated to "active".
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const verify = async (req, res, next) => {
     const token = req.body.token;
-    console.log(token);
 
     try {
         const user = await User.findOne({ verificationToken: token });
@@ -106,7 +125,15 @@ const verify = async (req, res, next) => {
     }
 };
 
-// Login with an existing user 
+/**
+ * Logs in a user.
+ * Checks if the user exists and is verified, compares the password,
+ * generates a 6-digit verification PIN, sends it via SMS, and saves it in the database.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const login = async (req, res, next) => {
     const { email, password } = req.body;
 
@@ -125,13 +152,10 @@ const login = async (req, res, next) => {
             return res.status(401).json({ message: 'Incorrect password' });
         }
 
-        // Generate a 6-digit PIN
         const pin = Math.floor(100000 + Math.random() * 900000);
 
-        // Send the PIN via SMS
         await sendSMS(user.phoneNumber, `Your verification PIN is ${pin}`);
 
-        // Save the PIN and expiration time in the database
         user.verificationPin = pin;
         await user.save();
 
@@ -142,6 +166,14 @@ const login = async (req, res, next) => {
     }
 };
 
+/**
+ * Verifies the PIN entered by the user.
+ * If the PIN is correct, generates a JWT token for the user.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const verifyPin = async (req, res, next) => {
     const { userId, pin } = req.body;
 
@@ -151,16 +183,11 @@ const verifyPin = async (req, res, next) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        console.log(user.verificationPin);
-
-        // Verify if the PIN is correct and not expired
         if (user.verificationPin === pin) {
-            // The PIN is correct, generate the JWT token
             const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
                 expiresIn: '1 hour',
             });
 
-            // Clear the PIN and expiration from the database
             user.verificationPin = null;
             user.pinExpiresAt = null;
             await user.save();
@@ -174,11 +201,24 @@ const verifyPin = async (req, res, next) => {
     }
 };
 
-// Get the information of the user
+/**
+ * Retrieves the profile information of the authenticated user.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ */
 const profile = async (req, res) => {
     res.status(201).json(req.user);
 };
 
+/**
+ * Updates the user's information.
+ * Hashes the password if it is being updated.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const updateUser = async (req, res, next) => {
     const { name, lastName, email, password, idNumber, birthDate, phoneNumber, role, plate, brand, model, year } = req.body;
 
@@ -210,6 +250,13 @@ const updateUser = async (req, res, next) => {
     }
 };
 
+/**
+ * Deletes the authenticated user's account.
+ * 
+ * @param {Object} req - Express request object.
+ * @param {Object} res - Express response object.
+ * @param {Function} next - Express next middleware function.
+ */
 const deleteUser = async (req, res, next) => {
     try {
         const user = await User.findByIdAndDelete(req.user);
